@@ -1,0 +1,4 @@
+enum Direction {
+  Forward,
+  Backward,
+}
