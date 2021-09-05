@@ -1,48 +1,62 @@
+import 'package:ciphers/models/good_functions.dart';
 import 'package:flutter/material.dart';
 
 import '../models/enums.dart';
 
-class CaesarForm extends StatelessWidget {
+class CaesarForm extends StatelessWidget with GoodFunctions {
   final _formKey = GlobalKey<FormState>();
   String message = '';
   int? shiftSize;
   Direction shiftDirection = Direction.Forward;
 
-  String _formatMessage(String oldString) {
-    String newString = '';
-    String noSpaces = oldString.replaceAll(' ', '');
-    for (int i = 0; i < noSpaces.length; i++) {
-      newString += noSpaces[i];
-      if (i % 5 == 4) newString += ' ';
-    }
-    return newString;
+  Widget _showCodedMessage() {
+    return Text(caesarEncode(
+      originalMessage: formatMessage(message.toUpperCase()),
+      shift: shiftSize!,
+      direction: shiftDirection,
+    ));
   }
 
-  Widget _showCodedMessage() {
-    return Text('Hell yeah bruh');
+  String caesarEncode({
+    required String originalMessage,
+    required int shift,
+    required Direction direction,
+  }) {
+    print('originalMessage before CaesarEncode: $originalMessage');
+    String newMessage = '';
+    for (int i = 0; i < originalMessage.length; i++) {
+      if (isLetter(originalMessage[i])) {
+        newMessage += encodeChar(
+          initialIndex: convertToIndex(originalMessage[i]),
+          shift: shift,
+          direction: direction,
+        );
+      } else
+        newMessage += ' ';
+    }
+    return newMessage;
   }
 
   void _submit(BuildContext context) {
     if (_formKey.currentState == null || !_formKey.currentState!.validate())
       return;
-    print(_formatMessage(message));
-    // showDialog(
-    //   context: context,
-    //   builder: (context) {
-    //     return AlertDialog(
-    //       title: Text('Code'),
-    //       content: _showCodedMessage(),
-    //       actions: [
-    //         TextButton(
-    //           child: Text('Noice'),
-    //           onPressed: () {
-    //             Navigator.of(context).pop();
-    //           },
-    //         )
-    //       ],
-    //     );
-    //   },
-    // );
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Code'),
+          content: _showCodedMessage(),
+          actions: [
+            TextButton(
+              child: Text('Noice'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -55,11 +69,6 @@ class CaesarForm extends StatelessWidget {
             decoration: InputDecoration(labelText: 'Message'),
             validator: (value) {
               if (value == null || value.isEmpty) return 'Enter message';
-              RegExp exp = new RegExp(r"[^a-z ]", caseSensitive: false);
-              print(exp.allMatches(value));
-              if (true) {
-                return 'Must all be letters or spaces';
-              }
               message = value;
             },
           ),
